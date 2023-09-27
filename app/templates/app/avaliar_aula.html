@@ -1,0 +1,7 @@
+<h1>Avaliar Aula</h1>
+<form method="post" action="">
+  {% csrf_token %}
+  <label for="nota">Nota:</label>
+  <input type="text" name="nota" required />
+  <button type="submit">Enviar Avaliação</button>
+</form>

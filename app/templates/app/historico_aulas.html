@@ -1,0 +1,11 @@
+<h1>Seu Histórico de Aulas</h1>
+<ul>
+  {% for aula in aulas %}
+  <li>
+    {{ aula.turma.disciplina.nome }} - {{ aula.data }} - Nota: {{
+    aula.nota|default:"Não avaliada" }} {% if aula.nota is None %}
+    <a href="{% url 'avaliar_aula' aula.id %}">Avaliar</a>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>

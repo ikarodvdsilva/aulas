@@ -1,0 +1,7 @@
+<h1>Seu Histórico de Aulas</h1>
+<ul>
+  <h1>{{ disciplina.nome }}</h1>
+  {% for turma in turmas %}
+  <p>{{ turma.professor }} - {{ turma.alunos.count }} alunos</p>
+  {% endfor %}
+</ul>

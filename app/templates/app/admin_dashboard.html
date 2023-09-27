@@ -1,0 +1,28 @@
+<!-- admin_dashboard.html -->
+
+<h1>Dashboard do Administrador</h1>
+<h2>Disciplinas</h2>
+<ul>
+  {% for disciplina in disciplinas %}
+  <li>{{ disciplina.nome }}</li>
+  {% endfor %}
+</ul>
+
+<h2>Turmas</h2>
+<ul>
+  {% for turma in turmas %}
+  <li>
+    {{ turma.disciplina.nome }} - Professor: {{ turma.professor.username }}
+  </li>
+  {% endfor %}
+</ul>
+
+<h2>Aulas</h2>
+<ul>
+  {% for aula in aulas %}
+  <li>
+    {{ aula.turma.disciplina.nome }} - Data: {{ aula.data }} - Nota: {{
+    aula.nota|default:"Não avaliada" }}
+  </li>
+  {% endfor %}
+</ul>
