@@ -1,8 +1,13 @@
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Disciplina, Turma, Aula, Avaliacao
+from django.contrib.auth.models import User
+from app.serializers import AlunoSerializer
+from .models import Aluno, Disciplina, Turma, Aula, Avaliacao
 from django.contrib.auth.forms import UserCreationForm
 from .forms import AlunoRegistroForm
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 
 @login_required
@@ -77,3 +82,49 @@ def registrar_aluno(request):
         "app/registrar_aluno.html",
         {"user_form": user_form, "aluno_form": aluno_form},
     )
+
+
+import json
+
+
+@csrf_exempt
+@require_POST
+def aluno_api(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            nome = data.get("nome")
+            matricula = data.get("matricula")
+            senha = data.get("senha")
+            # username = data.get("user")
+
+            # if not username:
+            #     username = matricula
+
+            if nome and matricula and senha:
+                # Verifica se o nome de usuário já existe
+                if User.objects.filter(username=nome).exists():
+                    # print(username)
+                    # print(User.objects.filter(username=username))
+                    print(senha)
+
+                    return JsonResponse(
+                        {"status": "error", "message": "Nome de usuário já existe."},
+                        status=400,
+                    )
+                # user = User.objects.create_user(username=username, password=senha)
+                aluno = Aluno.objects.create(nome=nome, matricula=matricula)
+                return JsonResponse({"status": "success"})
+            else:
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "message": "Nome, matrícula e senha são obrigatórios.",
+                    },
+                    status=400,
+                )
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {"status": "error", "message": "Erro ao decodificar o JSON."},
+                status=400,
+            )
