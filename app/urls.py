@@ -12,9 +12,9 @@ from .views import (
 
 urlpatterns = [
     path("api/alunos/", aluno_api, name="aluno_api"),
+    path("admin/", admin_dashboard, name="admin_dashboard"),
     path("historico/", historico_aulas, name="historico_aulas"),
     path("avaliar/<int:aula_id>/", avaliar_aula, name="avaliar_aula"),
-    path("admin/", admin_dashboard, name="admin_dashboard"),
     path("disciplinas/", disciplinas, name="disciplinas"),
     path(
         "disciplina/<int:disciplina_id>/",

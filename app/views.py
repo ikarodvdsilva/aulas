@@ -42,7 +42,7 @@ def admin_dashboard(request):
 
     return render(
         request,
-        "admin_dashboard.html",
+        "app/admin_dashboard.html",
         {"disciplinas": disciplinas, "turmas": turmas, "aulas": aulas},
     )
 
