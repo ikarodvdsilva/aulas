@@ -2,12 +2,51 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from app import serializers
 from app.serializers import AlunoSerializer
 from .models import Aluno, Disciplina, Turma, Aula, Avaliacao
 from django.contrib.auth.forms import UserCreationForm
 from .forms import AlunoRegistroForm
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.core.serializers import serialize
+from django.contrib.auth import authenticate, login
+import json
+
+
+@csrf_exempt
+@require_POST
+def login_view(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        username = data.get("username")
+        password = data.get("password")
+
+        if username and password:
+            # Aqui, não fornecemos a matrícula, apenas o usuário e a senha
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+                return JsonResponse(
+                    {"status": "success", "message": "Login bem-sucedido."}
+                )
+            else:
+                return JsonResponse(
+                    {"status": "error", "message": "Credenciais inválidas."}, status=401
+                )
+        else:
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "message": "Nome de usuário e senha são obrigatórios.",
+                },
+                status=400,
+            )
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"status": "error", "message": "Erro ao decodificar o JSON."}, status=400
+        )
 
 
 @login_required
@@ -15,7 +54,8 @@ def historico_aulas(request):
     aluno = request.user
     turmas = Turma.objects.filter(alunos=aluno)
     aulas = Aula.objects.filter(turma__in=turmas)
-    return render(request, "historico_aulas.html", {"aulas": aulas})
+    serialized_aulas = serializers.serialize("json", aulas)
+    return JsonResponse({"aulas": json.loads(serialized_aulas)})
 
 
 @login_required
@@ -28,37 +68,48 @@ def avaliar_aula(request, aula_id):
         Avaliacao.objects.create(aluno=aluno, aula=aula, nota=nota)
         return redirect("historico_aulas")
 
-    return render(request, "avaliar_aula.html", {"aula": aula})
+    return render(request, "app/avaliar_aula.html", {"aula": aula})
 
 
 @login_required
 def admin_dashboard(request):
     if not request.user.is_staff:
-        return redirect("login")
+        return JsonResponse(
+            {"status": "error", "message": "Usuário não autorizado"}, status=403
+        )
 
     disciplinas = Disciplina.objects.all()
     turmas = Turma.objects.all()
     aulas = Aula.objects.all()
 
-    return render(
-        request,
-        "app/admin_dashboard.html",
-        {"disciplinas": disciplinas, "turmas": turmas, "aulas": aulas},
+    serialized_disciplinas = serializers.serialize("json", disciplinas)
+    serialized_turmas = serializers.serialize("json", turmas)
+    serialized_aulas = serializers.serialize("json", aulas)
+
+    return JsonResponse(
+        {
+            "disciplinas": json.loads(serialized_disciplinas),
+            "turmas": json.loads(serialized_turmas),
+            "aulas": json.loads(serialized_aulas),
+        }
     )
 
 
 def disciplinas(request):
     disciplinas = Disciplina.objects.all()
-    return render(request, "app/disciplinas.html", {"disciplinas": disciplinas})
+    serialized_disciplinas = serializers.serialize("json", disciplinas)
+    return JsonResponse({"disciplinas": json.loads(serialized_disciplinas)})
 
 
 def detalhes_disciplina(request, disciplina_id):
     disciplina = get_object_or_404(Disciplina, pk=disciplina_id)
     turmas = Turma.objects.filter(disciplina=disciplina)
-    return render(
-        request,
-        "app/detalhes_disciplina.html",
-        {"disciplina": disciplina, "turmas": turmas},
+    serialized_turmas = serializers.serialize("json", turmas)
+    return JsonResponse(
+        {
+            "disciplina": json.loads(serializers.serialize("json", [disciplina])[1:-1]),
+            "turmas": json.loads(serialized_turmas),
+        }
     )
 
 
@@ -96,23 +147,13 @@ def aluno_api(request):
             nome = data.get("nome")
             matricula = data.get("matricula")
             senha = data.get("senha")
-            # username = data.get("user")
-
-            # if not username:
-            #     username = matricula
 
             if nome and matricula and senha:
-                # Verifica se o nome de usuário já existe
                 if User.objects.filter(username=nome).exists():
-                    # print(username)
-                    # print(User.objects.filter(username=username))
-                    print(senha)
-
                     return JsonResponse(
                         {"status": "error", "message": "Nome de usuário já existe."},
                         status=400,
                     )
-                # user = User.objects.create_user(username=username, password=senha)
                 aluno = Aluno.objects.create(nome=nome, matricula=matricula)
                 return JsonResponse({"status": "success"})
             else:

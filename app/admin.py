@@ -4,7 +4,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from app.forms import AulaAdminForm
-from .models import Aluno, Aula, Avaliacao, Disciplina, Turma
+from .models import Aluno, Aula, Avaliacao, Disciplina, Professor, Turma
 
 
 class AvaliacaoInline(admin.TabularInline):
@@ -62,3 +62,4 @@ admin.site.register(Avaliacao, AvaliacaoAdmin)
 admin.site.register(Turma, TurmaAdmin)
 admin.site.register(Disciplina)
 admin.site.register(Aluno)
+admin.site.register(Professor)
