@@ -2,30 +2,26 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from app import serializers
-from app.serializers import AlunoSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Aluno, Disciplina, Turma, Aula, Avaliacao
 from django.contrib.auth.forms import UserCreationForm
 from .forms import AlunoRegistroForm
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.core.serializers import serialize
 from django.contrib.auth import authenticate, login
 import json
 
 
 @csrf_exempt
 @require_POST
-def login_view(request):
+def aluno_api(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
         username = data.get("username")
         password = data.get("password")
-
+        print(12)
         if username and password:
-            # Aqui, não fornecemos a matrícula, apenas o usuário e a senha
             user = authenticate(request, username=username, password=password)
-
             if user is not None:
                 login(request, user)
                 return JsonResponse(
@@ -140,32 +136,34 @@ import json
 
 @csrf_exempt
 @require_POST
-def aluno_api(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode("utf-8"))
-            nome = data.get("nome")
-            matricula = data.get("matricula")
-            senha = data.get("senha")
+def login_view(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        username = data.get("username")
+        password = data.get("password")
 
-            if nome and matricula and senha:
-                if User.objects.filter(username=nome).exists():
-                    return JsonResponse(
-                        {"status": "error", "message": "Nome de usuário já existe."},
-                        status=400,
-                    )
-                aluno = Aluno.objects.create(nome=nome, matricula=matricula)
-                return JsonResponse({"status": "success"})
-            else:
-                return JsonResponse(
-                    {
-                        "status": "error",
-                        "message": "Nome, matrícula e senha são obrigatórios.",
-                    },
-                    status=400,
-                )
-        except json.JSONDecodeError:
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
             return JsonResponse(
-                {"status": "error", "message": "Erro ao decodificar o JSON."},
-                status=400,
+                {
+                    "status": "success",
+                    "message": "Login bem-sucedido.",
+                    "access_token": access_token,
+                }
             )
+        else:
+            return JsonResponse(
+                {"status": "error", "message": "Credenciais inválidas."},
+                status=401,
+            )
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"status": "error", "message": "Erro ao decodificar o JSON."},
+            status=400,
+        )

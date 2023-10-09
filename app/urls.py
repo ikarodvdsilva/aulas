@@ -8,9 +8,11 @@ from .views import (
     historico_aulas,
     avaliar_aula,
     admin_dashboard,
+    login_view,
 )
 
 urlpatterns = [
+    path("api/login/", login_view, name="login_view"),
     path("api/alunos/", aluno_api, name="aluno_api"),
     path("admin/", admin_dashboard, name="admin_dashboard"),
     path("historico/", historico_aulas, name="historico_aulas"),
