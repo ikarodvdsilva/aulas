@@ -1,17 +1,20 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Aluno, Disciplina, Turma, Aula, Avaliacao
 from django.contrib.auth.forms import UserCreationForm
 from .forms import AlunoRegistroForm
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.contrib.auth import authenticate, login
-import json
-from rest_framework import serializers
 from django.contrib.auth.decorators import login_required
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+import json
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import serializers  # Importe o módulo serializers correto
+
 @csrf_exempt
 @require_POST
 def aluno_api(request):
@@ -19,13 +22,25 @@ def aluno_api(request):
         data = json.loads(request.body.decode("utf-8"))
         username = data.get("username")
         password = data.get("password")
-        print(12)
+
         if username and password:
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
+
+                refresh = RefreshToken.for_user(user)
+                access_token = str(refresh.access_token)
+
+                # Inclua o nome do usuário no payload do token
+                access_token_payload = refresh.access_token.payload
+                access_token_payload['username'] = user.username
+
                 return JsonResponse(
-                    {"status": "success", "message": "Login bem-sucedido."}
+                    {
+                        "status": "success",
+                        "message": "Login bem-sucedido.",
+                        "access_token": str(access_token_payload),
+                    }
                 )
             else:
                 return JsonResponse(
@@ -34,7 +49,7 @@ def aluno_api(request):
         else:
             return JsonResponse(
                 {
-                    "status": "error",
+                    "status": "error" ,
                     "message": "Nome de usuário e senha são obrigatórios.",
                 },
                 status=400,
@@ -44,16 +59,15 @@ def aluno_api(request):
             {"status": "error", "message": "Erro ao decodificar o JSON."}, status=400
         )
 
-
 @login_required
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def historico_aulas(request):
-    aluno = "ikaro"
-    print(11)
+    aluno = request.user
     turmas = Turma.objects.filter(alunos=aluno)
     aulas = Aula.objects.filter(turma__in=turmas)
     serialized_aulas = serializers.serialize("json", aulas)
     return JsonResponse({"aulas": json.loads(serialized_aulas)})
-
 
 @login_required
 def avaliar_aula(request, aula_id):
@@ -93,10 +107,15 @@ def admin_dashboard(request):
 
 
 def disciplinas(request):
+    print(request)
     disciplinas = Disciplina.objects.all()
-    serialized_disciplinas = serializers.serialize("json", disciplinas)
-    return JsonResponse({"disciplinas": json.loads(serialized_disciplinas)})
-
+    class DisciplinaSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Disciplina
+            fields = '__all__'
+    serializer = DisciplinaSerializer(disciplinas, many=True)
+    serialized_disciplinas = serializer.data
+    return JsonResponse({"disciplinas": serialized_disciplinas})
 
 def detalhes_disciplina(request, disciplina_id):
     disciplina = get_object_or_404(Disciplina, pk=disciplina_id)
@@ -132,8 +151,6 @@ def registrar_aluno(request):
     )
 
 
-
-
 @csrf_exempt
 @require_POST
 def login_view(request):
@@ -143,7 +160,6 @@ def login_view(request):
         password = data.get("password")
 
         user = authenticate(request, username=username, password=password)
-        print(user)
 
         if user is not None:
             login(request, user)

@@ -17,7 +17,7 @@ urlpatterns = [
     path("admin/", admin_dashboard, name="admin_dashboard"),
     path("api/historico/", historico_aulas, name="historico_aulas"),
     path("avaliar/<int:aula_id>/", avaliar_aula, name="avaliar_aula"),
-    path("disciplinas/", disciplinas, name="disciplinas"),
+    path("api/disciplinas/", disciplinas, name="disciplinas"),
     path(
         "disciplina/<int:disciplina_id>/",
         detalhes_disciplina,
