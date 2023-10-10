@@ -10,8 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib.auth import authenticate, login
 import json
-
-
+from rest_framework import serializers
+from django.contrib.auth.decorators import login_required
 @csrf_exempt
 @require_POST
 def aluno_api(request):
@@ -47,7 +47,8 @@ def aluno_api(request):
 
 @login_required
 def historico_aulas(request):
-    aluno = request.user
+    aluno = "ikaro"
+    print(11)
     turmas = Turma.objects.filter(alunos=aluno)
     aulas = Aula.objects.filter(turma__in=turmas)
     serialized_aulas = serializers.serialize("json", aulas)
@@ -131,7 +132,6 @@ def registrar_aluno(request):
     )
 
 
-import json
 
 
 @csrf_exempt
@@ -143,6 +143,7 @@ def login_view(request):
         password = data.get("password")
 
         user = authenticate(request, username=username, password=password)
+        print(user)
 
         if user is not None:
             login(request, user)
@@ -150,11 +151,15 @@ def login_view(request):
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
 
+            # Inclua o nome do usuário no payload do token
+            access_token_payload = refresh.access_token.payload
+            access_token_payload['username'] = user.username
+
             return JsonResponse(
                 {
                     "status": "success",
                     "message": "Login bem-sucedido.",
-                    "access_token": access_token,
+                    "access_token": str(access_token_payload),
                 }
             )
         else:
