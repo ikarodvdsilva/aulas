@@ -1,9 +1,9 @@
+from .models import Aluno, Aula, Avaliacao, Disciplina, Professor, Turma
+from django.utils.safestring import mark_safe
+from django.utils.html import format_html
+from app.forms import AulaAdminForm
 from django.contrib import admin
 from django.urls import reverse
-from django.utils.html import format_html
-from django.utils.safestring import mark_safe
-from app.forms import AulaAdminForm
-from .models import Aluno, Aula, Avaliacao, Disciplina, Professor, Turma
 
 
 class AvaliacaoInline(admin.TabularInline):
