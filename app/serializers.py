@@ -1,6 +1,6 @@
 from django.core.serializers import serialize
 from rest_framework import serializers
-from .models import Aula
+from .models.aulas import Aula
 
 
 class AlunoSerializer:

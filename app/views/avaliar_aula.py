@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseForbidden
-from ..models import Aluno, Aula, Avaliacao
+from ..models.alunos import Aluno
+from ..models.aulas import Aula
+from ..models.avaliacoes import Avaliacao
 from django.db import IntegrityError
 from django.http import JsonResponse
 import json

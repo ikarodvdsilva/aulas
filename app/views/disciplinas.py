@@ -1,6 +1,8 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
-from ..models import Aluno, Disciplina, Turma
+from ..models.alunos import Aluno
+from ..models.turmas import Turma
+from ..models.disciplinas import Disciplina
 from rest_framework import serializers
 from django.http import JsonResponse
 

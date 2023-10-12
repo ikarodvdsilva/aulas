@@ -1,8 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from ..models import Aluno, Aula, Turma
 from ..serializers import AulaSerializer
+from ..models.alunos import Aluno
+from ..models.turmas import Turma
+from ..models.aulas import Aula
 
 
 @api_view(["GET"])

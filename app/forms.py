@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
-from .models import Aluno, Aula
-from .models import CustomUser
+from .models.alunos import Aluno
+from .models.aulas import Aula
+from .models.models import CustomUser
 from django import forms
 
 

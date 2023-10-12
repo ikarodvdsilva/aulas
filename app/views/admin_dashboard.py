@@ -1,5 +1,7 @@
 from django.contrib.auth.decorators import login_required
-from ..models import Disciplina, Turma, Aula
+from ..models.disciplinas import Disciplina
+from ..models.turmas import Turma
+from ..models.aulas import Aula
 from rest_framework import serializers
 from django.http import JsonResponse
 import json
