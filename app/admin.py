@@ -34,6 +34,15 @@ class AvaliacaoAdmin(admin.ModelAdmin):
     def aluno(self, obj):
         return obj.aluno.nome
 
+    # Adiciona a ação em lote para excluir avaliações selecionadas
+    actions = ["delete_selected"]
+
+    def delete_selected(modeladmin, request, queryset):
+        # Exclui todas as avaliações selecionadas
+        queryset.delete()
+
+    delete_selected.short_description = "Excluir avaliações selecionadas"
+
 
 class TurmaAdmin(admin.ModelAdmin):
     inlines = [AulaInline, AvaliacaoInline]
