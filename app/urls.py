@@ -1,13 +1,11 @@
 from django.urls import path
-from .views import (
-    aluno_api,
-    detalhes_disciplina,
-    disciplinas,
-    historico_aulas,
-    avaliar_aula,
-    admin_dashboard,
-    login_view,
-)
+from .views.login_view import login_view
+from .views.admin_dashboard import admin_dashboard
+from .views.aluno_api import aluno_api
+from .views.historico_aulas import historico_aulas
+from .views.avaliar_aula import avaliar_aula
+from .views.disciplinas import disciplinas
+from .views.detalhes_disciplina import detalhes_disciplina
 
 urlpatterns = [
     path("api/login/", login_view, name="login_view"),
