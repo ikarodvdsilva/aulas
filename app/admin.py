@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-
 from app.forms import AulaAdminForm
 from .models import Aluno, Aula, Avaliacao, Disciplina, Professor, Turma
 
@@ -34,11 +33,9 @@ class AvaliacaoAdmin(admin.ModelAdmin):
     def aluno(self, obj):
         return obj.aluno.nome
 
-    # Adiciona a ação em lote para excluir avaliações selecionadas
     actions = ["delete_selected"]
 
     def delete_selected(modeladmin, request, queryset):
-        # Exclui todas as avaliações selecionadas
         queryset.delete()
 
     delete_selected.short_description = "Excluir avaliações selecionadas"

@@ -13,7 +13,7 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 import json
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework import serializers  # Importe o módulo serializers correto
+from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden
 from rest_framework import serializers
@@ -24,6 +24,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Aluno, Aula, Avaliacao
 from .serializers import AulaSerializer
+from django.shortcuts import get_object_or_404
 
 
 @csrf_exempt
@@ -38,14 +39,10 @@ def aluno_api(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-
                 refresh = RefreshToken.for_user(user)
                 access_token = str(refresh.access_token)
-
-                # Inclua o nome do usuário no payload do token
                 access_token_payload = refresh.access_token.payload
                 access_token_payload["username"] = user.username
-
                 return JsonResponse(
                     {
                         "status": "success",
@@ -76,7 +73,6 @@ def historico_aulas(request, user_id):
     aluno = get_object_or_404(Aluno, id=user_id)
     turmas = Turma.objects.filter(alunos=aluno)
     aulas = Aula.objects.filter(turma__in=turmas)
-
     serializer = AulaSerializer(aulas, many=True)
     return Response({"aulas": serializer.data})
 
@@ -86,41 +82,32 @@ def avaliar_aula(request, user_id, aula_id, nota):
     try:
         aluno = get_object_or_404(Aluno, id=user_id)
         aula = get_object_or_404(Aula, pk=aula_id, turma__alunos=aluno)
-
         if not aula.is_same_day_as_today():
             return HttpResponseForbidden("Você só pode avaliar aulas do mesmo dia.")
-
         disciplina = aula.turma.disciplina
-
         if request.method == "POST":
             nota_str = nota
-
             if nota_str is None:
                 return JsonResponse({"error": "Nota não fornecida."}, status=400)
-
             try:
                 nota = float(nota_str)
             except ValueError:
                 return JsonResponse(
                     {"error": "Nota fornecida não é um número válido."}, status=400
                 )
-
             Avaliacao.objects.create(
                 aluno=aluno, aula=aula, nota=nota, turma=aula.turma
             )
             return JsonResponse(
                 {"message": "Avaliação criada com sucesso!"}, status=201
             )
-
         return render(
             request, "app/avaliar_aula.html", {"aula": aula, "disciplina": disciplina}
         )
-
     except IntegrityError:
         return JsonResponse(
             {"error": "Erro de integridade ao salvar a avaliação."}, status=500
         )
-
     except Exception as e:
         return JsonResponse({"error": f"Erro inesperado: {str(e)}"}, status=500)
 
@@ -131,15 +118,12 @@ def admin_dashboard(request):
         return JsonResponse(
             {"status": "error", "message": "Usuário não autorizado"}, status=403
         )
-
     disciplinas = Disciplina.objects.all()
     turmas = Turma.objects.all()
     aulas = Aula.objects.all()
-
     serialized_disciplinas = serializers.serialize("json", disciplinas)
     serialized_turmas = serializers.serialize("json", turmas)
     serialized_aulas = serializers.serialize("json", aulas)
-
     return JsonResponse(
         {
             "disciplinas": json.loads(serialized_disciplinas),
@@ -147,9 +131,6 @@ def admin_dashboard(request):
             "aulas": json.loads(serialized_aulas),
         }
     )
-
-
-from django.shortcuts import get_object_or_404
 
 
 @csrf_exempt
@@ -165,7 +146,6 @@ def disciplinas(request, user_id):
 
     serializer = DisciplinaSerializer(disciplinas, many=True)
     serialized_disciplinas = serializer.data
-
     return JsonResponse({"disciplinas": serialized_disciplinas})
 
 
@@ -173,14 +153,8 @@ def disciplinas(request, user_id):
 def detalhes_disciplina(request, disciplina_id):
     disciplina = get_object_or_404(Disciplina, pk=disciplina_id)
     turmas = Turma.objects.filter(disciplina=disciplina)
-
-    # Criar um serializer para a disciplina
     disciplina_serializer = DisciplinaSerializer(disciplina)
-
-    # Criar um serializer para as turmas
     turma_serializer = TurmaSerializer(turmas, many=True)
-
-    # Retornar os dados serializados como JSON usando a Response do DRF
     return Response(
         {
             "disciplina": disciplina_serializer.data,
@@ -230,19 +204,14 @@ def login_view(request):
         data = json.loads(request.body.decode("utf-8"))
         username = data.get("username")
         password = data.get("password")
-
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
-
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
-
-            # Inclua o nome do usuário no payload do token
             access_token_payload = refresh.access_token.payload
             access_token_payload["username"] = user.username
-
             return JsonResponse(
                 {
                     "status": "success",
