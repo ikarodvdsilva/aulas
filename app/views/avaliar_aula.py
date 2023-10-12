@@ -1,4 +1,3 @@
-from ..models import Aluno, Aula, Avaliacao
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseForbidden

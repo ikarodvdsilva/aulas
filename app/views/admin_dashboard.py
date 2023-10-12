@@ -1,8 +1,7 @@
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from ..models import Disciplina, Turma, Aula
 from rest_framework import serializers
+from django.http import JsonResponse
 import json
 
 

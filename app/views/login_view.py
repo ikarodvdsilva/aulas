@@ -1,9 +1,9 @@
-from django.contrib.auth import authenticate, login
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+import json
 
 
 @csrf_exempt
