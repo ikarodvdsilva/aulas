@@ -5,7 +5,7 @@ from .models.avaliacoes import Avaliacao
 from .models.disciplinas import Disciplina
 from .models.professores import Professor
 from django.utils.safestring import mark_safe
-from app.forms import AulaAdminForm
+from app.forms import AulaAdminForm, AvaliacoesAdminForm
 from django.contrib import admin
 from django.urls import reverse
 
@@ -25,24 +25,18 @@ class AulaInline(admin.TabularInline):
 
 
 class AvaliacaoAdmin(admin.ModelAdmin):
-    list_display = ("turma", "aula", "aluno", "nota")
-    list_filter = ("turma__disciplina", "aula__data", "aluno")
+    list_display = ("turma", "aula", "media_avaliacoes")
+    list_filter = ("turma__disciplina", "aula__data")
 
-    def turma(self, obj):
-        return obj.aula.turma
+    form = AvaliacoesAdminForm
 
-    def aula(self, obj):
-        return obj.aula.data
+    def media_avaliacoes(self, obj):
+        if obj.aula.avaliacao_set.count() > 0:
+            return obj.aula.calcular_media_avaliacoes()
+        else:
+            return "N/A"
 
-    def aluno(self, obj):
-        return obj.aluno.nome
-
-    actions = ["delete_selected"]
-
-    def delete_selected(modeladmin, request, queryset):
-        queryset.delete()
-
-    delete_selected.short_description = "Excluir avaliações selecionadas"
+    media_avaliacoes.short_description = "Média de Avaliações"
 
 
 class TurmaAdmin(admin.ModelAdmin):

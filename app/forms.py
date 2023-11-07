@@ -1,4 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
+
+from app.models.avaliacoes import Avaliacao
 from .models.alunos import Aluno
 from .models.aulas import Aula
 from .models.models import CustomUser
@@ -14,6 +16,12 @@ class AlunoRegistroForm(forms.ModelForm):
 class AulaAdminForm(forms.ModelForm):
     class Meta:
         model = Aula
+        fields = "__all__"
+
+
+class AvaliacoesAdminForm(forms.ModelForm):
+    class Meta:
+        model = Avaliacao
         fields = "__all__"
 
 
