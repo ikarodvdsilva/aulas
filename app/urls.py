@@ -6,8 +6,10 @@ from .views.historico_aulas import historico_aulas
 from .views.avaliar_aula import avaliar_aula
 from .views.disciplinas import disciplinas
 from .views.detalhes_disciplina import detalhes_disciplina
+from .views.get_aulas import get_aulas
 
 urlpatterns = [
+    path("api/get-aulas/<int:user_id>/", get_aulas, name="get_aulas"),
     path("api/login/", login_view, name="login_view"),
     path("api/alunos/", aluno_api, name="aluno_api"),
     path("admin/", admin_dashboard, name="admin_dashboard"),

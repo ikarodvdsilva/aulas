@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseForbidden
@@ -14,8 +15,8 @@ def avaliar_aula(request, user_id, aula_id, nota):
     try:
         aluno = get_object_or_404(Aluno, id=user_id)
         aula = get_object_or_404(Aula, pk=aula_id, turma__alunos=aluno)
-        # if not aula.is_same_day_as_today():
-        #     return HttpResponseForbidden("Você só pode avaliar aulas do mesmo dia.")
+        if datetime.datetime.now().date() != aula.data:
+            return HttpResponseForbidden("Você só pode avaliar aulas do mesmo dia.")
         disciplina = aula.turma.disciplina
         if request.method == "POST":
             nota_str = nota
