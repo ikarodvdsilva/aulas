@@ -13,7 +13,7 @@ class AulaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Aula
-        fields = ["data", "disciplina_nome"]
+        fields = ["id", "data", "disciplina_nome"]
 
     def get_disciplina_nome(self, obj):
         return obj.turma.disciplina.nome
